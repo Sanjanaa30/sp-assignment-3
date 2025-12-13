@@ -70,6 +70,7 @@ int main() {
     fclose(in);
 
     shutdown(sockfd, SHUT_WR);
+    clock_gettime(CLOCK_MONOTONIC, &t1);
 
     char reply[128];
     ssize_t r = recv(sockfd, reply, sizeof(reply) - 1, 0);

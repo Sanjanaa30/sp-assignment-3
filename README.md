@@ -52,4 +52,39 @@ use command gcc -o server server.c -pthread for server and
 
 
 
+Client Operations & Real-Time Notifications
+Part 3 adds an interactive client that supports:
+Reading files from the server (cat equivalent)
+Writing/editing files using a simple line-based editor (nano-like)
+Real-time notifications when a file is already being edited by another client
+The server sends custom protocol messages to notify clients when a write lock is unavailable.
 
+Build (Part 3 Client)
+gcc -o server server.c -pthread
+gcc -o client_ops client_ops.c
+
+Run (Part 3)
+./server
+
+In another terminal:
+./client_ops
+
+Client Operations
+When running client_ops, select:
+Read file – prints file contents from the server
+Write/edit file – opens a simple editor
+
+Type text line by line
+:wq → save and quit
+:q! → quit without saving
+
+Real-Time Write Notifications
+If a client requests write access while another client is editing the same file:
+The server sends a notification:
+NOTIFY BUSY <filename>
+
+The client displays:
+[Notification] <filename> is currently being edited by another client.
+Once the file becomes available, the server sends:
+OK WRITE <filename>
+and the client can begin editing.

@@ -157,12 +157,30 @@ static void *handle_write(int connection, pthread_rwlock_t *rw, const char *file
     
     //Test
     printf("[T%lu] waiting WRLOCK %s\n", (unsigned long)pthread_self(), filename);
-    
-    // Acquire write lock so only one writer can write
-    pthread_rwlock_wrlock(rw);
-    
-    //Test
-    printf("[T%lu] acquired WRLOCK %s\n", (unsigned long)pthread_self(), filename);
+
+/*
+ * Part 3: Real-time notifications when file is already being edited.
+ * We try to acquire WRLOCK. If busy, notify client immediately.
+ */
+for (;;) {
+    int trc = pthread_rwlock_trywrlock(rw);
+    if (trc == 0) break; // acquired
+    // Busy (likely EBUSY). Notify client and retry.
+    char note[1024];
+    snprintf(note, sizeof(note), "NOTIFY BUSY %s\n", filename);
+    send(connection, note, strlen(note), 0);
+    usleep(200000); // 200ms retry; keeps "real-time" feel
+}
+
+printf("[T%lu] acquired WRLOCK %s\n", (unsigned long)pthread_self(), filename);
+
+// Tell client it can start sending file contents now
+{
+    char ok[1024];
+    snprintf(ok, sizeof(ok), "OK WRITE %s\n", filename);
+    send(connection, ok, strlen(ok), 0);
+}
+
 
     //usleep(300000);
 

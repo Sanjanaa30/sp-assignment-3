@@ -21,7 +21,7 @@ sp-assignment-3/
 ├── server_conf
 ├── client_conf
 ├── client_ops_conf
-├── empty_upload/
+├── shared/ (created when you run './server')
 │   └── text1.txt
 └── README.md
 ```
